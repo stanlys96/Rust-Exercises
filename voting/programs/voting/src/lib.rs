@@ -7,21 +7,21 @@ pub mod voting {
     use super::*;
 
     pub fn init_voting(ctx: Context<InitVoting>) -> Result<()> {
-        ctx.accounts.vote.has_initiated = true;
+        ctx.accounts.vote_account.has_started = true;
         Ok(())
     }
 
-    pub fn give_vote(ctx: Context<GiveVote>, vote_type: VoteType) -> Result<()> {
+    pub fn give_voting(ctx: Context<GiveVoting>, vote_type: VoteType) -> Result<()> {
         match vote_type {
             VoteType::GM => {
-                msg!("Voted for GM! 🤝");
-                ctx.accounts.vote.gm += 1;
+                msg!("GM chosen!");
+                ctx.accounts.vote_account.gm += 1;
             }
             VoteType::GN => {
-                msg!("Voted for GN! 🤞");
-                ctx.accounts.vote.gn += 1;
+                msg!("GN chosen!");
+                ctx.accounts.vote_account.gn += 1;
             }
-        };
+        }
         Ok(())
     }
 }
@@ -32,10 +32,10 @@ pub struct InitVoting<'info> {
         init,
         payer = signer,
         space = 8 + 1 + 8 + 8,
-        seeds = [b"vote", signer.key().as_ref()],
+        seeds = [b"vote"],
         bump
     )]
-    pub vote: Account<'info, Vote>,
+    pub vote_account: Account<'info, Vote>,
 
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -43,24 +43,23 @@ pub struct InitVoting<'info> {
     pub system_program: Program<'info, System>,
 }
 
-#[account]
-#[derive(Default)]
-pub struct Vote {
-    pub has_initiated: bool,
-    pub gn: u64,
-    pub gm: u64,
-}
-
 #[derive(Accounts)]
-pub struct GiveVote<'info> {
+pub struct GiveVoting<'info> {
     #[account(
         mut,
-        seeds = [b"vote", signer.key().as_ref()],
+        seeds = [b"vote"],
         bump
     )]
-    pub vote: Account<'info, Vote>,
+    pub vote_account: Account<'info, Vote>,
 
     pub signer: Signer<'info>,
+}
+
+#[account]
+pub struct Vote {
+    pub has_started: bool,
+    pub gm: u64,
+    pub gn: u64,
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
